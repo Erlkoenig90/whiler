@@ -4,7 +4,7 @@ import whiler.grammar.Grammar;
 
 public class Parser {
 	private Grammar grammar;
-	private String text;
+	protected String text;
 	private NTermInst root;
 	private SymbolInst current;
 	private int code;

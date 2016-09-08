@@ -1,0 +1,4 @@
+X0 := X1 ;
+LOOP X2 DO
+	X0 := X0 + 1
+OD

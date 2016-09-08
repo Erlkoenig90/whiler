@@ -54,6 +54,8 @@ public class Grammar {
 				sb.append("\\t");
 			else if (c == '\\')
 				sb.append("\\\\");
+			else if (c == '\"')
+				sb.append("\\\"");
 			else if (c >= 32 && c <= 126)
 				sb.append(c);
 			else
@@ -125,7 +127,7 @@ public class Grammar {
 					} else {
 						String name = ((NTermInst) symbolTrees.get (k).getChild (0)).getChild (1).collectString (p);
 						if (!productions.containsKey(name))
-							throw new Exception ("Invalid NonTerminal name");
+							throw new Exception ("Invalid NonTerminal \"" + name + "\"");
 						symbols [k] = productions.get (name);
 					}
 				}
