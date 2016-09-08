@@ -1,32 +1,26 @@
 package whiler;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import whiler.grammar.Grammar;
-import whiler.grammar.NonTerminal;
-import whiler.grammar.Rule;
-import whiler.grammar.Terminal;
-import whiler.parser.NTermInst;
-import whiler.parser.Parser;
 
 public class Main {
 
-	public static void main (String [] args) throws IOException {
+	public static void main (String [] args) throws Exception {
 		StringBuilder sb = new StringBuilder ();
 		Grammar.bnf.toBNF (sb);
-		String str = sb.toString ();
+		String staticToStr = sb.toString ();
 		
-		System.out.println ("Parsing String: " + str);
-		NTermInst tree = Parser.parse (Grammar.bnf, str);
-		if (tree == null)
-			System.out.println ("Parse Error");
-		else {
-			sb = new StringBuilder ();
-			tree.toString (sb, 0);
-			System.out.println (sb);
-		}
+		System.out.println (staticToStr);
+		
+		Grammar g = Grammar.fromBNF (staticToStr);
+		
+		sb = new StringBuilder ();
+		g.toBNF (sb);
+		String parsedToStr = sb.toString ();
+		System.out.println (parsedToStr);
+		
+		if (staticToStr.equals(parsedToStr))
+			System.out.println ("Strings match!");
+		else
+			System.out.println ("Strings mismatch!");
 	}
 }

@@ -10,7 +10,7 @@ public class Parser {
 	private int code;
 	private NTermInst lastDecision;
 	
-	public static NTermInst parse (Grammar grammar, String text) {
+	public static Parser parse (Grammar grammar, String text) {
 		return new Parser (grammar, text).run ();
 	}
 	
@@ -60,7 +60,7 @@ public class Parser {
 			current = current.parentSymbol;
 		}
 	}
-	private NTermInst run () {
+	private Parser run () {
 		root = new NTermInst (null, null, 0, grammar.root (), -1);
 		current = root;
 		lastDecision = root;
@@ -89,6 +89,9 @@ public class Parser {
 				}
 			}
 		}
-		return code == 1 ? root : null;
+		return code == 1 ? this : null;
+	}
+	public NTermInst getRoot () {
+		return root;
 	}
 }

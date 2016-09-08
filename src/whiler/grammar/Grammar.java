@@ -1,16 +1,37 @@
 package whiler.grammar;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import whiler.parser.NTermInst;
+import whiler.parser.Parser;
+
 public class Grammar {
 	protected NonTerminal [] productions;
+	protected Map<String, NonTerminal> nonTerminals;
 	
 	public Grammar (NonTerminal [] productions) {
 		this.productions = productions;
+		nonTerminals = new TreeMap <String, NonTerminal> ();
+		for (int i = 0; i < productions.length; i++) {
+			nonTerminals.put(productions [i].name, productions [i]);
+		}
+	}
+	public Grammar (NonTerminal [] productions, Map<String, NonTerminal> nonTerminals) {
+		this.productions = productions;
+		this.nonTerminals = nonTerminals;
 	}
 	
 	public NonTerminal root () { return productions [0]; }
 	
 	public static Grammar make (NonTerminal... productions) {
 		return new Grammar (productions);
+	}
+	
+	public NonTerminal get (String name) {
+		return nonTerminals.get (name);
 	}
 	
 	public static Grammar bnf;
@@ -40,7 +61,81 @@ public class Grammar {
 		}
 		return sb.toString ();
 	}
+	public static String strFromBNF (String in) {
+		StringBuilder sb = new StringBuilder ();
+		for (int i = 0; i < in.length(); i++) {
+			char c = in.charAt (i);
+			if (c == '\n')
+				sb.append("\\n");
+			else if (c == '\r')
+				sb.append("\\r");
+			else if (c == '\t')
+				sb.append("\\t");
+			else if (c == '\\')
+				sb.append("\\\\");
+			else if (c >= 32 && c <= 126)
+				sb.append(c);
+			else
+				sb.append(String.format("\\x%02x", (int) c));
+		}
+		return sb.toString ();
+	}
 	
+	public static Grammar fromBNF (String strBNF) throws Exception {
+		Parser p = Parser.parse (bnf, strBNF);
+		if (p == null) return null;
+		
+		NonTerminal BNF_Def = bnf.get("Def");
+		NonTerminal BNF_Rule = bnf.get("Rule");
+		NonTerminal BNF_Char = bnf.get("Char");
+		NonTerminal BNF_Symbol = bnf.get("Symbol");
+		
+		List<NTermInst> definitions = new ArrayList<NTermInst> ();
+		p.getRoot ().collectNonTerminals(definitions, BNF_Def);
+		
+		Map<String, NonTerminal> productions = new TreeMap<String, NonTerminal> ();
+		NonTerminal [] productionsOrdered = new NonTerminal [definitions.size ()];
+		
+		for (int i = 0; i < definitions.size (); i++) {
+			productionsOrdered [i] = new NonTerminal (((NTermInst) definitions.get (i).getChild (1)).getChild (1).collectString (p));
+			productions.put (productionsOrdered [i].name, productionsOrdered [i]);
+		}
+		
+		for (int i = 0; i < definitions.size (); i++) {
+			List<NTermInst> ruleTrees = new ArrayList <NTermInst> ();
+			definitions.get (i).getChild (4).collectNonTerminals (ruleTrees, BNF_Rule);
+			
+			Rule [] rules = new Rule [ruleTrees.size ()];
+			for (int j = 0; j < rules.length; j++) {
+				List<NTermInst> symbolTrees = new ArrayList<NTermInst> ();
+				ruleTrees.get (j).collectNonTerminals (symbolTrees, BNF_Symbol);
+				Symbol [] symbols = new Symbol [symbolTrees.size ()];
+				for (int k = 0; k < symbols.length; k++) {
+					if (symbolTrees.get (k).getAppliedRule () == 0) {
+						List<NTermInst> charTrees = new ArrayList<NTermInst> ();
+						((NTermInst) symbolTrees.get (k).getChild (0)).getChild (1).collectNonTerminals(charTrees, BNF_Char);
+						
+						StringBuilder sb = new StringBuilder (charTrees.size ());
+						for (int l = 0; l < charTrees.size (); l++) {
+							char c = (char) charTrees.get(l).getAppliedRule ();
+							sb.append(c);
+						}
+						
+						symbols [k] = new Terminal (sb.toString ());
+					} else {
+						String name = ((NTermInst) symbolTrees.get (k).getChild (0)).getChild (1).collectString (p);
+						if (!productions.containsKey(name))
+							throw new Exception ("Invalid NonTerminal name");
+						symbols [k] = productions.get (name);
+					}
+				}
+				rules [j] = new Rule (symbols);
+			}
+			productionsOrdered [i].setRules(rules);
+		}
+		
+		return new Grammar (productionsOrdered);
+	}
 	static {
 		NonTerminal BNF2 = NonTerminal.make ("BNF2");
 		NonTerminal BNF = NonTerminal.make ("BNF");
@@ -126,70 +221,3 @@ public class Grammar {
 		bnf = make (BNF, BNF2, Def, Rules, Rules2, Rule_, Symbol, String, Chars, Char, NTerm, Name, Name2, SpaceE, Space, Alpha, Alnum);
 	}
 }
-
-/*
-
-<BNF> ::= <Def> <BNF2>
-<BNF2> ::= "\n" <Def> <BNF2> |  | "\n" <BNF2>
-<Def> ::= <SpaceE> <NTerm> <SpaceE> "::=" <Rules>
-<Rules> ::= <Rule> <Rules2>
-<Rules2> ::= "|" <Rule> <Rules2> | 
-<Rule> ::= <SpaceE> | <SpaceE> <Symbol> <Rule>
-<Symbol> ::= <String> | <NTerm>
-<String> ::= "\"" <Chars> "\""
-<Chars> ::=  | <Char> <Chars>
-<Char> ::= "\\x00" | "\\x01" | "\\x02" | "\\x03" | "\\x04" | "\\x05" | "\\x06" | "\\a" | "\\b" | "\\t" | "\\n" | "\\v" | "\\f" | "\\r" | "\\x0E" | "\\x0F" | "\\x10" | "\\x11" | "\\x12" | "\\x13" | "\\x14" | "\\x15" | "\\x16" | "\\x17" | "\\x18" | "\\x19" | "\\x1A" | "\\e" | "\\x1C" | "\\x1D" | "\\x1E" | "\\x1F" | " " | "!" | "\\\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "[" | "\\\\" | "]" | "^" | "_" | "`" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "{" | "|" | "}" | "~" | "\\x7F" | "\\x80" | "\\x81" | "\\x82" | "\\x83" | "\\x84" | "\\x85" | "\\x86" | "\\x87" | "\\x88" | "\\x89" | "\\x8A" | "\\x8B" | "\\x8C" | "\\x8D" | "\\x8E" | "\\x8F" | "\\x90" | "\\x91" | "\\x92" | "\\x93" | "\\x94" | "\\x95" | "\\x96" | "\\x97" | "\\x98" | "\\x99" | "\\x9A" | "\\x9B" | "\\x9C" | "\\x9D" | "\\x9E" | "\\x9F" | "\\xA0" | "\\xA1" | "\\xA2" | "\\xA3" | "\\xA4" | "\\xA5" | "\\xA6" | "\\xA7" | "\\xA8" | "\\xA9" | "\\xAA" | "\\xAB" | "\\xAC" | "\\xAD" | "\\xAE" | "\\xAF" | "\\xB0" | "\\xB1" | "\\xB2" | "\\xB3" | "\\xB4" | "\\xB5" | "\\xB6" | "\\xB7" | "\\xB8" | "\\xB9" | "\\xBA" | "\\xBB" | "\\xBC" | "\\xBD" | "\\xBE" | "\\xBF" | "\\xC0" | "\\xC1" | "\\xC2" | "\\xC3" | "\\xC4" | "\\xC5" | "\\xC6" | "\\xC7" | "\\xC8" | "\\xC9" | "\\xCA" | "\\xCB" | "\\xCC" | "\\xCD" | "\\xCE" | "\\xCF" | "\\xD0" | "\\xD1" | "\\xD2" | "\\xD3" | "\\xD4" | "\\xD5" | "\\xD6" | "\\xD7" | "\\xD8" | "\\xD9" | "\\xDA" | "\\xDB" | "\\xDC" | "\\xDD" | "\\xDE" | "\\xDF" | "\\xE0" | "\\xE1" | "\\xE2" | "\\xE3" | "\\xE4" | "\\xE5" | "\\xE6" | "\\xE7" | "\\xE8" | "\\xE9" | "\\xEA" | "\\xEB" | "\\xEC" | "\\xED" | "\\xEE" | "\\xEF" | "\\xF0" | "\\xF1" | "\\xF2" | "\\xF3" | "\\xF4" | "\\xF5" | "\\xF6" | "\\xF7" | "\\xF8" | "\\xF9" | "\\xFA" | "\\xFB" | "\\xFC" | "\\xFD" | "\\xFE" | "\\xFF"
-<NTerm> ::= "<" <Name> ">"
-<Name> ::= <Alpha> | <Alpha> <Name2>
-<Name2> ::= <Alnum> <Name2> | 
-<SpaceE> ::= <Space> | 
-<Space> ::= " " <SpaceE> | "\t" <SpaceE> | "\r" <SpaceE>
-<Alpha> ::= "A" | "a" | "B" | "b" | "C" | "c" | "D" | "d" | "E" | "e" | "F" | "f" | "G" | "g" | "H" | "h" | "I" | "i" | "J" | "j" | "K" | "k" | "L" | "l" | "M" | "m" | "N" | "n" | "O" | "o" | "P" | "p" | "Q" | "q" | "R" | "r" | "S" | "s" | "T" | "t" | "U" | "u" | "V" | "v" | "W" | "w" | "X" | "x" | "Y" | "y" | "Z" | "z"
-<Alnum> ::= "A" | "a" | "B" | "b" | "C" | "c" | "D" | "d" | "E" | "e" | "F" | "f" | "G" | "g" | "H" | "h" | "I" | "i" | "J" | "j" | "K" | "k" | "L" | "l" | "M" | "m" | "N" | "n" | "O" | "o" | "P" | "p" | "Q" | "q" | "R" | "r" | "S" | "s" | "T" | "t" | "U" | "u" | "V" | "v" | "W" | "w" | "X" | "x" | "Y" | "y" | "Z" | "z" | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-
-
-
-
-@@bnf ||= Grammar.new(["BNF", "BNF2", "Def", "Rules", "Rules2", "Rule", "Symbol", "String", "Chars", "Char", "NTerm", "Name", "Name2", "SpaceE", "Space", "Alpha", "Alnum"]) { |g|
-g["BNF"] <<  [g["Def"], g["BNF2"]]
-g["BNF2"].rules = [["\n", g["Def"], g["BNF2"]], [], ["\n", g["BNF2"]]]
-g["Def"] << [g["SpaceE"], g["NTerm"], g["SpaceE"], "::=", g["Rules"]]
-g["Rules"] << [g["Rule"], g["Rules2"]]
-g["Rules2"].rules= [["|", g["Rule"], g["Rules2"]], []]
-g["Rule"] << [g["SpaceE"]]
-g["Rule"] << [g["SpaceE"], g["Symbol"], g["Rule"]]
-
-g["Symbol"].rules = [[g["String"]], [g["NTerm"]]]
-g["String"] << ["\"", g["Chars"], "\""]
-g["Chars"] << []
-g["Chars"] << [g["Char"], g["Chars"]]
-for i in 0..255 do
-	g["Char"] << [[i].pack("C").inspect[1..-2]]
-end
-
-g["NTerm"] << ["<", g["Name"], ">"]
-g["Name"] << [g["Alpha"]]
-g["Name"] << [g["Alpha"], g["Name2"]]
-g["Name2"] << [g["Alnum"], g["Name2"]]
-g["Name2"] << []
-
-g["SpaceE"] << [g["Space"]]
-g["SpaceE"] << []
-g["Space"] << [" ",  g["SpaceE"]]
-g["Space"] << ["\t", g["SpaceE"]]
-g["Space"] << ["\r", g["SpaceE"]]
-
-for i in 0..25 do
-	a = [[[65 + i].pack("C")], [[97 + i].pack("C")]]
-	g["Alpha"].rules.concat(a)
-	g["Alnum"].rules.concat(a)
-end
-for i in 0..9 do
-	g["Alnum"] << [[48 + i].pack("C")]
-end
-g.start = g["BNF"]
-}
-
-
-
-*/

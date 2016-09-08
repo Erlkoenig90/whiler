@@ -1,5 +1,8 @@
 package whiler.parser;
 
+import java.util.List;
+import whiler.grammar.NonTerminal;
+
 public abstract class SymbolInst {
 	protected NTermInst parentDecision, parentSymbol;
 	protected int textPos;
@@ -9,5 +12,7 @@ public abstract class SymbolInst {
 		this.textPos = textPos;
 	}
 	abstract protected int getEndPos ();
-	abstract void toString (StringBuilder sb, int depth);
+	abstract void toParseTree (StringBuilder sb, int depth);
+	public abstract String collectString (Parser p);
+	abstract public void collectNonTerminals (List<NTermInst> collect, NonTerminal search);
 };

@@ -28,6 +28,8 @@ public class NonTerminal extends Symbol {
 		this.rules = rules;
 	}
 	
+	public String getName () { return name; }
+	
 	public String toString () { return "<" + name + ">"; }
 	
 	public void prodToBNF (StringBuilder sb) {

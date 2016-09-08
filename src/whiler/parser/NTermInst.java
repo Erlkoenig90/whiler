@@ -1,5 +1,7 @@
 package whiler.parser;
 
+import java.util.List;
+
 import whiler.grammar.NonTerminal;
 import whiler.grammar.Symbol;
 
@@ -40,14 +42,30 @@ public class NTermInst extends SymbolInst {
 		return endTextPos;
 	}
 	
-	public void toString (StringBuilder sb, int depth) {
+	public void toParseTree (StringBuilder sb, int depth) {
 		for (int i = 0; i < depth; i++) sb.append('\t');
 		sb.append(symbol);
 		sb.append (" {\n");
 		for (int i = 0; i < currRuleSymbols ().length; i++)
-			childSymbols [i].toString (sb, depth + 1);
+			childSymbols [i].toParseTree (sb, depth + 1);
 		
 		for (int i = 0; i < depth; i++) sb.append('\t');
 		sb.append ("}\n");
+	}
+	public String collectString (Parser p) {
+		if (childSymbols == null) return "";
+		return p.text.substring (textPos, endTextPos);
+	}
+	public int getChildCount () { return childSymbols.length; }
+	public SymbolInst getChild (int i) { return childSymbols [i]; }
+	public int getAppliedRule () {
+		return currentDecision;
+	}
+	public void collectNonTerminals (List<NTermInst> collect, NonTerminal search) {
+		if (symbol == search)
+			collect.add (this);
+		else if (childSymbols != null)
+			for (int i = 0; i < childSymbols.length; i++)
+				childSymbols [i].collectNonTerminals (collect, search);
 	}
 }
