@@ -1,0 +1,11 @@
+X1 := X2 ;
+IF X1 < X2 THEN
+	X2 := 0
+ELSE
+	X2 := 0
+FI ;
+WHILE X1 < X2 DO
+	LOOP X2 DO
+		X2 := X2 + 1
+	OD
+OD

@@ -1,5 +1,9 @@
 package whiler.whilep;
 
+import java.util.List;
+
+import whiler.gotop.Op;
+
 public class Sequence {
 	protected Statement [] statements;
 	public Sequence (Statement [] statements) {
@@ -14,6 +18,11 @@ public class Sequence {
 	protected void run (Interpreter ip) {
 		for (int i = 0; i < statements.length; i++) {
 			statements [i].run (ip);
+		}
+	}
+	void compileGoto (List<Op> op, CompileGoto c) {
+		for (int i = 0; i < statements.length; i++) {
+			statements [i].compileGoto (op, c);
 		}
 	}
 }

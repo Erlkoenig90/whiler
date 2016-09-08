@@ -68,7 +68,7 @@ public class Parser {
 				case 3:
 					{
 						int v1 = getVar (((NTermInst) c.getChild (1)).getChild (1), p);
-						int v2 = getVar (((NTermInst) c.getChild (1)).getChild (4), p);
+						int v2 = getVar (((NTermInst) c.getChild (1)).getChild (5), p);
 						if (v1 == v2)
 							throw new Exception (String.format("Comparing variable %d with itself!", v1));
 						s = new If (v1, v2, buildSequence ((NTermInst) c.getChild(4), p), buildSequence ((NTermInst) c.getChild (8), p));
@@ -80,7 +80,7 @@ public class Parser {
 				case 5:
 					{
 						int v1 = getVar (((NTermInst) c.getChild (1)).getChild (1), p);
-						int v2 = getVar (((NTermInst) c.getChild (1)).getChild (4), p);
+						int v2 = getVar (((NTermInst) c.getChild (1)).getChild (5), p);
 						if (v1 == v2)
 							throw new Exception (String.format("Comparing variable %d with itself!", v1));
 						s = new While (v1, v2, buildSequence ((NTermInst) c.getChild (4), p));
@@ -93,10 +93,9 @@ public class Parser {
 		}
 		return new Sequence (statements);
 	}
-	public static Sequence build (whiler.parser.Parser parsed) throws Exception {
+	public static Program build (whiler.parser.Parser parsed) throws Exception {
 		Sequence root = buildSequence (parsed.getRoot (), parsed);
 		
-		
-		return root;
+		return new Program (root);
 	}
 }
