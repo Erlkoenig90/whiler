@@ -119,7 +119,9 @@ public class Main {
 						System.exit (1);
 						return;
 					} else {
-						System.out.println ("Parsed succesfully");
+						StringBuilder sb = new StringBuilder ();
+						p.getRoot ().toParseTree (sb);
+						System.out.print (sb);
 						System.exit (0);
 						return;
 					}
