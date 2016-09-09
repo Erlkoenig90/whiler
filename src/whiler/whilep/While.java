@@ -7,7 +7,17 @@ import whiler.gotop.Goto;
 import whiler.gotop.Op;
 
 public class While extends Statement {
-	protected int varL, varG;
+	/**
+	 * Index of the variable that must be lesser in order for the condition to succeed
+	 */
+	protected int varL;
+	/**
+	 * Index of the variable that must be greater in order for the condition to succeed
+	 */
+	protected int varG;
+	/**
+	 * Sequence of statements to execute as long as the condition matches
+	 */
 	protected Sequence body;
 	public While (int varL, int varG, Sequence body) {
 		this.varL = varL;
@@ -23,10 +33,13 @@ public class While extends Statement {
 		}
 	}
 	protected void compileGoto(List<Op> op, CompileGoto c) {
+		// Obtain temporary variables
 		int t1 = c.tempVar; c.tempVar++;
 		int t2 = c.tempVar; c.tempVar++;
 		int start = op.size ();
 		BigInteger mONE = BigInteger.ZERO.subtract (BigInteger.ONE);
+		
+		// Comparison loop
 		
 		op.add (new whiler.gotop.Assign (t1, varL, BigInteger.ZERO));
 		op.add (new whiler.gotop.Assign (t2, varG, BigInteger.ZERO));
@@ -40,6 +53,7 @@ public class While extends Statement {
 		op.add (new whiler.gotop.Assign (t2, t2, mONE));
 		op.add (new Goto (start + 2));
 		
+		// Recursion - compile body
 		body.compileGoto (op, c);
 		
 		op.add (new Goto (start));

@@ -1,0 +1,27 @@
+X3 := 0 ;
+X3 := X3 + 1 ;
+IF X1 < X3 THEN
+	X0 := X2
+ELSE
+	X3 := 0 ;
+	WHILE X3 < X2 DO
+		IF X2 < X1 THEN
+			X4 := 0 ;
+			X5 := X2 ;
+			WHILE X5 < X1 DO
+				X4 := X4 + 1 ;
+				X5 := X5 + 1
+			OD ;
+			X1 := X4
+		ELSE
+			X4 := 0 ;
+			X5 := X1 ;
+			WHILE X5 < X2 DO
+				X4 := X4 + 1 ;
+				X5 := X5 + 1
+			OD ;
+			X2 := X4
+		FI
+	OD ;
+	X0 := X1
+FI

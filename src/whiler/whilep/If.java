@@ -6,9 +6,26 @@ import java.util.List;
 import whiler.gotop.Goto;
 import whiler.gotop.Op;
 
+/**
+ * Represents an If-Else construct in a while program.
+ */
 public class If extends Statement {
-	protected int varL, varG;
-	protected Sequence If, Else;
+	/**
+	 * Index of the variable that must be lesser in order for the condition to succeed
+	 */
+	protected int varL;
+	/**
+	 * Index of the variable that must be greater in order for the condition to succeed
+	 */
+	protected int varG;
+	/**
+	 * Sequence of statements to execute if the condition matches
+	 */
+	protected Sequence If;
+	/**
+	 * Sequence of statements to execute if the condition does not match
+	 */
+	protected Sequence Else;
 	public If (int varL, int varG, Sequence If, Sequence Else) {
 		this.varL = varL;
 		this.varG = varG;
@@ -19,6 +36,7 @@ public class If extends Statement {
 		return Math.max (If.getMaxVar(), Math.max (Else.getMaxVar(), Math.max (varL, varG)));
 	}
 	protected void run (Interpreter ip) {
+		// Compare variable data
 		if (ip.variables [varL].compareTo (ip.variables [varG]) == -1) {
 			If.run (ip);
 		} else {
@@ -26,12 +44,15 @@ public class If extends Statement {
 		}
 	}
 	protected void compileGoto(List<Op> op, CompileGoto c) {
+		// Obtain temporary variables
 		int t1 = c.tempVar; c.tempVar++;
 		int t2 = c.tempVar; c.tempVar++;
 		
+		// Remember beginning
 		int start = op.size ();
 		BigInteger mONE = BigInteger.ZERO.subtract (BigInteger.ONE);
 		
+		// Copmarison loop
 		op.add (new whiler.gotop.Assign (t1, varL, BigInteger.ZERO));
 		op.add (new whiler.gotop.Assign (t2, varG, BigInteger.ZERO));
 		

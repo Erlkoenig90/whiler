@@ -6,8 +6,17 @@ import java.util.List;
 import whiler.gotop.Goto;
 import whiler.gotop.Op;
 
+/**
+ * Represents a LOOP-Statement in a while program.
+ */
 public class Loop extends Statement {
+	/**
+	 * Variable containing the number of iterations
+	 */
 	protected int var;
+	/**
+	 * Sequence of statements that make up the loop body
+	 */
 	protected Sequence body;
 	public Loop (int var, Sequence body) {
 		this.var = var;
@@ -17,6 +26,7 @@ public class Loop extends Statement {
 		return Math.max (body.getMaxVar(), var);
 	}
 	protected void run (Interpreter ip) {
+		// Make copy of variable
 		BigInteger count = ip.variables [var];
 		while (count.compareTo(BigInteger.ZERO) == 1) {
 			body.run (ip);
@@ -24,6 +34,7 @@ public class Loop extends Statement {
 		}
 	}
 	protected void compileGoto(List<Op> op, CompileGoto c) {
+		// A temporary variable is needed because the loop body could modify the original one.
 		int t = c.tempVar; c.tempVar++;
 		int start = op.size ();
 		op.add (new whiler.gotop.Assign (t, var, BigInteger.ZERO));

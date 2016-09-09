@@ -5,8 +5,18 @@ import java.util.List;
 
 import whiler.gotop.Op;
 
+/**
+ * Represents an assignment of variables in a while program.
+ */
 public class Assign extends Statement {
-	protected int destination, source;
+	/**
+	 * Index of the destination variable
+	 */
+	protected int destination;
+	/**
+	 * Index of the source variable
+	 */
+	protected int source;
 	
 	public Assign (int destination, int source) {
 		this.destination = destination;
