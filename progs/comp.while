@@ -1,0 +1,5 @@
+IF X1 < X2 THEN
+	X0 := X0 + 1
+ELSE
+	X0 := 0
+FI

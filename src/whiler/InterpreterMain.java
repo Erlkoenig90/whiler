@@ -13,7 +13,7 @@ public class InterpreterMain {
 
 	public static void main (String [] args) throws Exception {
 		if (args.length < 2) {
-			System.err.println ("Usage: java -cp ... InterpreterMain FileName ARG1 { ARGS }");
+			System.err.println ("Usage: java -cp ... whiler.InterpreterMain FileName ARG1 { ARGS }");
 			System.exit (-1);
 		}
 		String sourcecode = new String(Files.readAllBytes(Paths.get(args [0])), StandardCharsets.UTF_8);

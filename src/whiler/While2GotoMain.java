@@ -13,7 +13,7 @@ public class While2GotoMain {
 
 	public static void main (String [] args) throws Exception {
 		if (args.length != 2) {
-			System.err.println ("Usage: java -cp ... InterpreterMain FileName FileName");
+			System.err.println ("Usage: java -cp ... whiler.While2GotoMain SourceFileName DestFileName");
 			System.exit (-1);
 		}
 		String sourcecode = new String(Files.readAllBytes(Paths.get(args [0])), StandardCharsets.UTF_8);

@@ -1,9 +1,14 @@
 package whiler.gotop;
 
 public class Program {
-	Op [] op;
+	protected Op [] op;
+	protected int numVars;
 	public Program (Op [] op) {
 		this.op = op;
+		numVars = 0;
+		for (int i = 0; i < op.length; i++)
+			numVars = Math.max(numVars, op [i].getMaxVar());
+		++numVars;
 	}
 	public String toString () {
 		StringBuilder sb = new StringBuilder ();

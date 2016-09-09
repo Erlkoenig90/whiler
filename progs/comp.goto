@@ -1,0 +1,13 @@
+000:  X3 := X1 +0
+001:  X4 := X2 +0
+002:  IF X4 = 0 THEN GOTO 9
+003:  IF X3 = 0 THEN GOTO 7
+004:  X3 := X3 -1
+005:  X4 := X4 -1
+006:  GOTO 2
+007:  X0 := X0 +1
+008:  GOTO 12
+009:  IF X0 = 0 THEN GOTO 12
+010:  X0 := X0 -1
+011:  GOTO 9
+012:  HALT
