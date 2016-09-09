@@ -16,7 +16,7 @@ The whole application was written to be as simple as possible. The parser does n
 The requirements are:
 
 Library name | Version known to work | JAR file
--|-|-
+-------------|-----------------------|---------
 [JUnit](http://junit.org) | 4.12 | junit-4.12.jar
 [Hamcrest-Core](http://hamcrest.org/JavaHamcrest)  (JUnit requirement) | 1.3 | hamcrest-core-1.3.jar
 [ASM](http://asm.ow2.org) | 5.1 | asm-5.1.jar
