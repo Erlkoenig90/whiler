@@ -57,12 +57,13 @@ public class Main {
 						+   "      - Compile WHILE program to GOTO program\n"
 						+   "    While2Java InFile ClassName OutFile\n"
 						+   "      - Compile WHILE program to Java class\n"
-						+   "    RunJavaWhile File Input...\n"
+						+   "    RunJavaWhile InFile Input...\n"
 						+   "      - Compile WHILE program to Java and run it\n"
 						+	"    ShowBNF\n"
 						+   "      - Print the BNF of the grammar used to parse BNF's\n"
 						+	"    ShowWhile\n"
-						+   "      - Print the BNF of the grammar used to parse while progams\n"
+						+   "      - Print the BNF of the grammar used to parse while progams\n\n"
+						+   "  OutFile can also be \"-\" to print to the console.\n"
 		);
 		System.exit (1);
 	}
@@ -70,12 +71,16 @@ public class Main {
 		return new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
 	}
 	static private void writefile (String filename, String text) throws IOException {
-		try (FileOutputStream fos = new FileOutputStream (filename)) {
+		if (filename.equals("-"))
+			System.out.print (text);
+		else try (FileOutputStream fos = new FileOutputStream (filename)) {
 			fos.write (text.getBytes (StandardCharsets.UTF_8));
 		}
 	}
 	static private void writefile (String filename, byte [] data) throws IOException {
-		try (FileOutputStream fos = new FileOutputStream (filename)) {
+		if (filename.equals("-"))
+			System.out.write (data);
+		else try (FileOutputStream fos = new FileOutputStream (filename)) {
 			fos.write (data);
 		}
 	}
