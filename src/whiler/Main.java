@@ -1,0 +1,207 @@
+package whiler;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import whiler.gotop.CompileJava;
+import whiler.gotop.JavaProg;
+import whiler.grammar.Grammar;
+import whiler.parser.Parser;
+import whiler.whilep.CompileGoto;
+import whiler.whilep.Interpreter;
+import whiler.whilep.Program;
+
+/**
+ * This is the main entry point for console usage
+ */
+public class Main {
+	static private void usage () throws URISyntaxException {
+		String jarpath = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+		
+		System.out.print (	"Usage: java -cp " + jarpath + " whiler.Main Args...\n"
+						+	"  where Args is:\n"
+						+	"    ParseBNF File\n"
+						+   "      - Check syntax of a BNF file, and print canonical form of BNF\n"
+						+	"    Parse BNF-File File\n"
+						+   "      - Parse a file with given syntax and print syntax tree\n"
+						+   "    RunWhile File Input...\n"
+						+   "      - Interpret WHILE program from file and print result\n"
+						+   "    While2Goto InFile OutFile\n"
+						+   "      - Compile WHILE program to GOTO program\n"
+						+   "    While2Java InFile ClassName OutFile\n"
+						+   "      - Compile WHILE program to Java class\n"
+						+   "    RunJavaWhile File Input...\n"
+						+   "      - Compile WHILE program to Java and run it\n"
+						+	"    ShowBNF\n"
+						+   "      - Print the BNF of the grammar used to parse BNF's\n"
+						+	"    ShowWhile\n"
+						+   "      - Print the BNF of the grammar used to parse while progams\n"
+		);
+		System.exit (1);
+	}
+	static private String readfile (String filename) throws IOException {
+		return new String(Files.readAllBytes(Paths.get(filename)), StandardCharsets.UTF_8);
+	}
+	static private void writefile (String filename, String text) throws IOException {
+		try (FileOutputStream fos = new FileOutputStream (filename)) {
+			fos.write (text.getBytes (StandardCharsets.UTF_8));
+		}
+	}
+	static private void writefile (String filename, byte [] data) throws IOException {
+		try (FileOutputStream fos = new FileOutputStream (filename)) {
+			fos.write (data);
+		}
+	}
+	public static void main (String [] args) throws Exception {
+		if (args.length < 1) { usage (); return; }
+		
+		switch (args [0]) {
+			case "ParseBNF":
+				{
+					if (args.length != 2) { usage (); return; }
+					Grammar g = Grammar.fromBNF (readfile (args [1]));
+					if (g == null) {
+						System.out.println ("Syntax error");
+						System.exit (1);
+					} else {
+						StringBuilder sb = new StringBuilder ();
+						g.toBNF (sb);
+						System.out.println (sb);
+						
+						System.exit (0);
+					}
+					break;
+				}
+			case "Parse":
+				{
+					if (args.length != 3) { usage (); return; }
+					Grammar g = Grammar.fromBNF (readfile (args [1]));
+					if (g == null) {
+						System.out.println ("Syntax error in BNF");
+						System.exit (1);
+						return;
+					}
+					Parser p = Parser.parse (g, readfile (args [2]));
+					if (p == null) {
+						System.out.println ("Syntax error in source file");
+						System.exit (1);
+						return;
+					} else {
+						System.out.println ("Parsed succesfully");
+						System.exit (0);
+						return;
+					}
+				}
+			case "RunWhile":
+				{
+					if (args.length < 2) { usage (); return; }
+					Parser p = whiler.whilep.Parser.parse (readfile (args [1]));
+					if (p == null) {
+						System.out.println ("Syntax error in WHILE source file");
+						System.exit (1);
+						return;
+					}
+					
+					Program prog = whiler.whilep.Parser.build (p);
+					
+					Interpreter ip = new Interpreter (prog);
+					
+					BigInteger [] input = new BigInteger [args.length - 2];
+					for (int i = 0; i < args.length - 2; i++) {
+						input [i] = new BigInteger (args [i + 2]);
+					}
+					
+					BigInteger output = ip.run (input);
+					
+					System.out.println (output);
+					System.exit (0);
+					break;
+				}
+			case "While2Goto":
+				{
+					if (args.length != 3) { usage (); return; }
+					Parser p = whiler.whilep.Parser.parse (readfile (args [1]));
+					if (p == null) {
+						System.out.println ("Syntax error in WHILE source file");
+						System.exit (1);
+						return;
+					}
+					
+					Program prog = whiler.whilep.Parser.build (p);
+					whiler.gotop.Program gprog = CompileGoto.run (prog);
+					writefile (args [2], gprog.toString ());
+					System.exit (0);
+					return;
+				}
+			case "While2Java":
+				{
+					if (args.length != 4) { usage (); return; }
+					Parser p = whiler.whilep.Parser.parse (readfile (args [1]));
+					if (p == null) {
+						System.out.println ("Syntax error in WHILE source file");
+						System.exit (1);
+						return;
+					}
+					
+					Program prog = whiler.whilep.Parser.build (p);
+					whiler.gotop.Program gprog = CompileGoto.run (prog);
+					
+					JavaProg jprog = CompileJava.run (args [2], gprog);
+					writefile (args [3], jprog.getBinary ());
+					System.exit (0);
+					break;
+				}
+			case "RunJavaWhile":
+				{
+					if (args.length < 2) { usage (); return; }
+					Parser p = whiler.whilep.Parser.parse (readfile (args [1]));
+					if (p == null) {
+						System.out.println ("Syntax error in WHILE source file");
+						System.exit (1);
+						return;
+					}
+					
+					Program prog = whiler.whilep.Parser.build (p);
+					whiler.gotop.Program gprog = CompileGoto.run (prog);
+					
+					JavaProg jprog = CompileJava.run ("whiler.GeneratedGoto", gprog);
+					
+					BigInteger [] input = new BigInteger [args.length - 2];
+					for (int i = 0; i < args.length - 2; i++) {
+						input [i] = new BigInteger (args [i + 2]);
+					}
+					
+					BigInteger output = jprog.run (input);
+					System.out.println (output);
+					System.exit (0);
+					break;
+				}
+			case "ShowBNF":
+				{
+					if (args.length != 1) { usage (); return; }
+					StringBuilder sb = new StringBuilder ();
+					Grammar.bnf.toBNF (sb);
+					System.out.println (sb);
+					System.exit (0);
+					break;
+				}
+			case "ShowWhile":
+				{
+					if (args.length != 1) { usage (); return; }
+					StringBuilder sb = new StringBuilder ();
+					whiler.whilep.Parser.grammar.toBNF (sb);
+					System.out.println (sb);
+					System.exit (0);
+					break;
+				}
+			default:
+				usage ();
+				System.exit (1);
+		}
+	}
+}

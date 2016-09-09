@@ -18,7 +18,7 @@ public class Interpreter implements whiler.ProgRunner {
 		// Initialize variables
 		variables = new BigInteger [prog.numVars];
 		variables [0] = BigInteger.ZERO;
-		System.arraycopy (input, 0, variables, 1, input.length);
+		System.arraycopy (input, 0, variables, 1, Math.min (input.length, variables.length - 1));
 		for (int i = input.length + 1; i < prog.numVars; i++) {
 			variables [i] = BigInteger.ZERO;
 		}
