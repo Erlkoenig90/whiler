@@ -23,7 +23,7 @@ Library name | Version known to work | JAR file
 
 For compiling & running whiler, these JAR's have to be in the classpath.
 
-The repository contains an eclipse Java project which can be imported using File->Import. To use it, the aforementioned JAR files have to be added to the classpath (Right Click on the Project -> Properties -> Java Build Path -> Libraries) or just copied into the project directory. The project contains a few demo launch configurations that can be run directly from eclipse. There is also one for running a few unit tests. Eclipse allows to compile the project into a JAR file for stand-alone usage. To create the JAR file, right-click on the "whiler.jardesc" file and select "Create JAR". The "progs" directory contains a few example WHILE/GOTO programs.
+The repository contains an eclipse Java project which can be imported using File->Import. To use it, the aforementioned JAR files have to be added to the classpath (Right Click on the Project -> Properties -> Java Build Path -> Libraries) or just copied into the project directory. The project contains a few demo launch configurations that can be run directly from eclipse. There is also one for running a few unit tests. Eclipse allows to compile the project into a JAR file for stand-alone usage. To create the JAR file, right-click on the "whiler.jardesc" file and select "Create JAR". The JAR file does not include the unit tests, therefore it does not need the JUnit and hamcrest libraries. The "progs" directory contains a few example WHILE/GOTO programs.
 
 whiler can also be run from the command line to access all of its functionality. For example, the following command runs the interpreter with the multiplication program:
 ```shell

@@ -33,7 +33,7 @@ public class NonTerminal extends Symbol {
 	 */
 	public Rule [] rules;
 	/**
-	 * Name of the NonTerminal, excluding the <> brackets
+	 * Name of the NonTerminal, excluding the &lt;&gt; brackets
 	 */
 	protected String name;
 	
@@ -73,7 +73,7 @@ public class NonTerminal extends Symbol {
 	}
 	
 	/**
-	 * @return Name of the NonTerminal, excluding the <> brackets
+	 * @return Name of the NonTerminal, excluding the &lt;&gt; brackets
 	 */
 	public String getName () {
 		return name;

@@ -11,8 +11,12 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
-        <javaElement handleIdentifier="=whiler/src"/>
+        <javaElement handleIdentifier="=whiler/src&lt;whiler.grammar"/>
+        <javaElement handleIdentifier="=whiler/src&lt;whiler.whilep"/>
         <file path="/whiler/README.md"/>
+        <javaElement handleIdentifier="=whiler/src&lt;whiler.gotop"/>
+        <javaElement handleIdentifier="=whiler/src&lt;whiler"/>
+        <javaElement handleIdentifier="=whiler/src&lt;whiler.parser"/>
         <file path="/whiler/LICENSE"/>
     </selectedElements>
 </jardesc>
