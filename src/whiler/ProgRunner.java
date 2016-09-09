@@ -20,40 +20,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package whiler.whilep;
+package whiler;
 
-import java.util.List;
-
-import whiler.gotop.Op;
+import java.math.BigInteger;
 
 /**
- * Represents a sequence of statements in a while program (separated by semicolons in the source code)
+ * Common interface for interpreters/Java program runner.
  */
-public class Sequence {
-	protected Statement [] statements;
-	public Sequence (Statement [] statements) {
-		this.statements = statements;
-	}
-	public int getMaxVar () {
-		int res = -1;
-		for (int i = 0; i < statements.length; i++)
-			res = Math.max(res, statements [i].getMaxVar());
-		return res;
-	}
+public interface ProgRunner {
 	/**
-	 * Run all statements in the interpreter
+	 * Runs the program.
+	 * 
+	 * @param input			The input variables. Does not need to contain variables for internal data
+	 * @return				The program result
 	 */
-	protected void run (Interpreter ip) {
-		for (int i = 0; i < statements.length; i++) {
-			statements [i].run (ip);
-		}
-	}
-	/**
-	 * Compile all statements into a GOTO program.
-	 */
-	void compileGoto (List<Op> op, CompileGoto c) {
-		for (int i = 0; i < statements.length; i++) {
-			statements [i].compileGoto (op, c);
-		}
-	}
+	public BigInteger run (BigInteger [] input) throws Exception;
 }
