@@ -6,6 +6,7 @@ The features are:
  * Usage of grammars specified in BNF
  * Parsing & Interpreting WHILE programs
  * Compiling WHILE programs into GOTO programs
+ * Interpreting GOTO programs
  * Compiling GOTO programs into Java Bytecode and saving those as Java ".class" files by using the [ASM](http://asm.ow2.org) library. These can be run from any Java application or directly on the console. This is a true but simple compilation to the JVM without any interpreter.
 
 This proves that it is possible to parse arbitrarily complex context-free grammars in a few hundred lines of code, and how WHILE & GOTO programs can serve as model languages for real-world ones.
@@ -49,6 +50,13 @@ where Args is:
 * While2Goto InFile OutFile
   
   Compile WHILE program to GOTO program
+* RunGoto File Input...
+  
+  Interpret GOTO program from file and print result
+  
+* Goto2Java InFile ClassName OutFile
+  
+  Compile GOTO program to Java class
 * While2Java InFile ClassName OutFile
   
   Compile WHILE program to Java class
@@ -60,7 +68,11 @@ where Args is:
   Print the BNF of the grammar used to parse BNF's
 * ShowWhile
   
-  Print the BNF of the grammar used to parse while progams
+  Print the BNF of the grammar used to parse while programs
+  
+* ShowGoto
+  
+  Print the BNF of the grammar used to parse goto programs
 
 OutFile can also be "-" to print to the console.
 
@@ -152,16 +164,28 @@ $ java -jar whiler.jar While2Goto progs/mult.while -
 011:  GOTO 4
 012:  HALT$ cat test.while 
 X0:=0
+
 ```
-Compiling the multiplication program into a Java program, analyzing the generated class file, and running it directly in Java:
+Running the multiplication GOTO program:
 ```sh
-$ java -jar whiler.jar While2Java progs/mult.while Mult progs/Mult.class
+$ java -jar whiler.jar RunGoto progs/mult.goto 3 4
+12
+```
+Compiling the multiplication goto program into a Java program, analyzing the generated class file, and running it directly in Java:
+```sh
+$ java -jar whiler.jar Goto2Java progs/mult.goto Mult progs/Mult.class
 $ javap progs/Mult.class
 public class Mult {
   static {};
   public static java.math.BigInteger run(java.math.BigInteger[]);
   public static void main(java.lang.String[]);
 }
+$ java -cp progs Mult 3 4
+12
+```
+Compiling the multiplication while program into a Java program, and running it directly in Java:
+```sh
+$ java -jar whiler.jar While2Java progs/mult.while Mult progs/Mult.class
 $ java -cp progs Mult 3 4
 12
 ```

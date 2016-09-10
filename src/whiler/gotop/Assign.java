@@ -74,4 +74,11 @@ public class Assign extends Op {
 		// Store result
 		c.mv.visitInsn (org.objectweb.asm.Opcodes.AASTORE);
 	}
+
+	protected void run (Interpreter ip) {
+		// Perform addition & copy.
+		ip.variables [destination] = ip.variables [source].add (add);
+		// Continue with next instruction
+		ip.pc++;
+	}
 }

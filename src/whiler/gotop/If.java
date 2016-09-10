@@ -22,6 +22,8 @@
 
 package whiler.gotop;
 
+import java.math.BigInteger;
+
 /**
  * The IF opcode performs a conditional jump, if the given variable is zero.
  */
@@ -72,5 +74,15 @@ public class If extends Op {
 		c.mv.visitMethodInsn (org.objectweb.asm.Opcodes.INVOKEVIRTUAL, "java/math/BigInteger", "compareTo", "(Ljava/math/BigInteger;)I", false);
 		// If return value was zero, jump to target
 		c.mv.visitJumpInsn (org.objectweb.asm.Opcodes.IFEQ, c.labels [target]);
+	}
+	protected void run (Interpreter ip) {
+		// Check for ZERO
+		if (ip.variables [variable].compareTo (BigInteger.ZERO) == 0) {
+			// Perform jump
+			ip.pc = target;
+		} else {
+			// Continue with next instruction
+			ip.pc++;
+		}
 	}
 }

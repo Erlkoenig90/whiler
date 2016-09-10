@@ -58,4 +58,9 @@ public class Goto extends Op {
 		// Jump to label of target instruction
 		c.mv.visitJumpInsn (org.objectweb.asm.Opcodes.GOTO, c.labels [target]);
 	}
+
+	protected void run (Interpreter ip) {
+		// Jump to target
+		ip.pc = target;
+	}
 }

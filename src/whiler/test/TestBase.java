@@ -22,8 +22,9 @@
 
 package whiler.test;
 
-import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import whiler.ProgRunner;
 import whiler.parser.Parser;
@@ -34,46 +35,74 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class TestBase {
 	whiler.whilep.Program whileP;
 	whiler.gotop.Program gotoP;
 	String gotoSource;
 	String name;
 	whiler.whilep.Interpreter wInt;
+	whiler.gotop.Interpreter gInt;
 	whiler.gotop.JavaProg javaP;
 	
 	ProgRunner currentRunner;
+	
+	Parser parsedWhile, parsedGoto;
 	
 	TestBase (String name) {
 		this.name = name;
 	}
 	
-	@Before
-	public void prepare () throws Exception {
+	@Test
+	public void runTests () throws Exception {
+		t1_parseWhile ();
+		t2_buildWhile ();
+		t3_checkGoto ();
+		t4_parseGoto ();
+		t5_testWhileInt ();
+		t6_testGotoInt ();
+		t7_testCompiled ();
+	}
+	
+	public void t1_parseWhile () throws Exception {
 		String sourcecode = new String (Files.readAllBytes (Paths.get ("progs/" + name + ".while")), StandardCharsets.UTF_8);
-		Parser p = whiler.whilep.Parser.parse (sourcecode);
-		assertNotNull (p);
-		whileP = whiler.whilep.Parser.build (p);
+		parsedWhile = whiler.whilep.Parser.parse (sourcecode);
+		assertNotNull (parsedWhile);
+	}
+	
+	public void t2_buildWhile () throws Exception {
+		whileP = whiler.whilep.Parser.build (parsedWhile);
 		wInt = new whiler.whilep.Interpreter (whileP);
-		
 		gotoP = whiler.whilep.CompileGoto.run (whileP);
+		gInt = new whiler.gotop.Interpreter (gotoP);
 		javaP = whiler.gotop.CompileJava.run ("whiler.test.Generated_" + name, gotoP);
 	}
 	
-	@Test
-	public void checkGotoSource () throws Exception {
+	public void t3_checkGoto () throws Exception {
 		String sourcecode = new String (Files.readAllBytes (Paths.get ("progs/" + name + ".goto")), StandardCharsets.UTF_8);
 		assertEquals (sourcecode, gotoP.toString ());
 	}
+
+	public void t4_parseGoto () throws Exception {
+		// Convert Goto program to string, parse back, convert to string again, and compare
+		parsedGoto = whiler.gotop.Parser.parse (gotoP.toString ());
+		assertNotNull (parsedGoto);
+		
+		assertEquals (gotoP.toString (), whiler.gotop.Parser.build (parsedGoto).toString ()); 
+	}
 	
-	@Test
-	public void testInterpreter () throws Exception {
+	public void t5_testWhileInt () throws Exception {
 		currentRunner = wInt;
 		progtests ();
 	}
 	
-	@Test
-	public void testCompiled () throws Exception {
+	public void t6_testGotoInt () throws Exception {
+		currentRunner = gInt;
+		progtests ();
+	}
+	
+	public void t7_testCompiled () throws Exception {
 		currentRunner = javaP;
 		progtests ();
 	}

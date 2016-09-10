@@ -37,4 +37,8 @@ public abstract class Op {
 	 * @param c		The Compiler instance
 	 */
 	protected abstract void compileJava (CompileJava c);
+	/**
+	 * Run this operation in the interpreter.
+	 */
+	protected abstract void run (Interpreter ip);
 }

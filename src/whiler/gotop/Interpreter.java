@@ -22,32 +22,50 @@
 
 package whiler.gotop;
 
-/**
- * The HALT opcode terminates the program immediately.
- */
-public class Halt extends Op {
-	public Halt () {
-	}
+import java.math.BigInteger;
+import whiler.ProgRunner;
+
+public class Interpreter implements ProgRunner {
+	/**
+	 * The program to run
+	 */
+	Program prog;
+	/**
+	 * Memory for variables
+	 */
+	protected BigInteger [] variables;
+	/**
+	 * The Program Counter, i.e. the index of the next instruction to run.
+	 */
+	protected int pc;
+	/**
+	 * Whether to continue interpreting the program. Is set to false by "HALT"
+	 */
+	protected boolean run;
 	
-	public void toString (StringBuilder sb) {
-		sb.append ("HALT");
-	}
-	
-	public int getMaxVar () {
-		return -1;
-	}
-	
-	protected void compileJava (CompileJava c) {
-		// Load entry 0 from variables array
-		c.mv.visitVarInsn (org.objectweb.asm.Opcodes.ALOAD, 1);
-		c.mv.visitInsn (org.objectweb.asm.Opcodes.ICONST_0);
-		c.mv.visitInsn (org.objectweb.asm.Opcodes.AALOAD);
-		// And return it
-		c.mv.visitInsn (org.objectweb.asm.Opcodes.ARETURN);
+	public Interpreter (Program prog) {
+		this.prog = prog;
 	}
 
-	protected void run (Interpreter ip) {
-		// Stop execution
-		ip.run = false;
+	public BigInteger run (BigInteger [] input) {
+		// Initialize variables
+		variables = new BigInteger [prog.numVars];
+		variables [0] = BigInteger.ZERO;
+		System.arraycopy (input, 0, variables, 1, Math.min (input.length, variables.length - 1));
+		for (int i = input.length + 1; i < prog.numVars; i++) {
+			variables [i] = BigInteger.ZERO;
+		}
+		
+		// Start with first instruction
+		run = true;
+		pc = 0;
+		
+		// Run until HALT
+		while (run) {
+			prog.op [pc].run (this);
+		}
+		
+		return variables [0];
 	}
+	
 }
