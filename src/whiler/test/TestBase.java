@@ -22,9 +22,7 @@
 
 package whiler.test;
 
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
 import whiler.ProgRunner;
 import whiler.parser.Parser;
@@ -35,8 +33,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class TestBase {
 	whiler.whilep.Program whileP;
 	whiler.gotop.Program gotoP;
